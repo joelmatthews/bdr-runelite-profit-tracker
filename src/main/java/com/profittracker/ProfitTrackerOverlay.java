@@ -1,4 +1,5 @@
 package com.profittracker;
+import com.profittracker.utility.ProfitTrackerCalculator;
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
 import net.runelite.client.ui.overlay.Overlay;
@@ -14,6 +15,9 @@ import javax.swing.*;
 import java.awt.*;
 
 import java.text.DecimalFormat;
+
+import static com.profittracker.utility.ProfitTrackerCalculator.calculateProfitHourly;
+
 /**
  * The ProfitTrackerOverlay class is used to display profit values for the user
  */
@@ -88,7 +92,7 @@ public class ProfitTrackerOverlay extends Overlay {
             millisecondsElapsed = 0;
         }
 
-        profitRateValue = calculateProfitHourly(millisecondsElapsed, profitValue);
+        profitRateValue = ProfitTrackerCalculator.calculateProfitHourly(millisecondsElapsed, profitValue);
 
         // Not sure how this can occur, but it was recommended to do so
         panelComponent.getChildren().clear();
@@ -205,25 +209,5 @@ public class ProfitTrackerOverlay extends Overlay {
         } else {
             return String.format("%02d:%02d:%02d", hr, min, sec);
         }
-    }
-
-    static long calculateProfitHourly(long millisecondsElapsed, long profit)
-    {
-        long averageProfitThousandForHour;
-        double averageProfitPerMillisecond;
-
-        if (millisecondsElapsed > 0)
-        {
-            averageProfitPerMillisecond = (double)profit / millisecondsElapsed;
-        }
-        else
-        {
-            // can't divide by zero, not enough time has passed
-            averageProfitPerMillisecond = 0;
-        }
-
-        averageProfitThousandForHour = (long)(averageProfitPerMillisecond * 3600);
-
-        return averageProfitThousandForHour;
     }
 }

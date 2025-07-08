@@ -1,21 +1,23 @@
 package com.profittracker.domain;
 
+import com.google.inject.Singleton;
+
 import java.util.Set;
 
+@Singleton
 public class ProfitProgressState {
     private Set<MilestoneEnum> reachedMilestones;
 
-    public boolean isMilestoneReached(MilestoneEnum milestone) {
+    public boolean isMilestoneAlreadyAchieved(MilestoneEnum milestone) {
         return reachedMilestones.contains(milestone);
     }
 
-    public boolean recordMilestoneReached(MilestoneEnum milestone) {
+    public Set<MilestoneEnum> recordMilestoneReached(MilestoneEnum milestone) {
 
-        if (!isMilestoneReached(milestone)) {
+        if (!isMilestoneAlreadyAchieved(milestone)) {
             reachedMilestones.add(milestone);
-            return true;
         }
-        return false;
+        return reachedMilestones;
     }
 
 }

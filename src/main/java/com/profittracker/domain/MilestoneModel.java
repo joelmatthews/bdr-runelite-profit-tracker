@@ -5,14 +5,14 @@ import java.util.Date;
 public class MilestoneModel {
     private String rsn;
     private long totalCurrentProfit;
-    private String currentProfitPerHour;
+    private long averageProfitThousandForHour;
     private MilestoneEnum milestone;
     private Date dateMilestoneAchieved;
 
-    public MilestoneModel(String rsn, long totalCurrentProfit, String currentProfitPerHour, MilestoneEnum milestone, Date dateMilestoneAchieved) {
+    public MilestoneModel(String rsn, long totalCurrentProfit, long averageProfitThousandForHour, MilestoneEnum milestone, Date dateMilestoneAchieved) {
         this.rsn = rsn;
         this.totalCurrentProfit = totalCurrentProfit;
-        this.currentProfitPerHour = currentProfitPerHour;
+        this.averageProfitThousandForHour = averageProfitThousandForHour;
         this.milestone = milestone;
         this.dateMilestoneAchieved = dateMilestoneAchieved;
     }
@@ -25,8 +25,8 @@ public class MilestoneModel {
         return totalCurrentProfit;
     }
 
-    public String getCurrentProfitPerHour() {
-        return currentProfitPerHour;
+    public long getAverageProfitThousandForHour() {
+        return averageProfitThousandForHour;
     }
 
     public MilestoneEnum getMilestone() {

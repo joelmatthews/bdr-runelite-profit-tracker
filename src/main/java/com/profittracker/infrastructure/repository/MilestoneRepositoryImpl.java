@@ -20,7 +20,7 @@ public class MilestoneRepositoryImpl implements com.profittracker.application.Mi
         return new MilestoneDTO(
                 milestone.getRsn(),
                 milestone.getCurrentProfit(),
-                milestone.getCurrentProfitPerHour(),
+                milestone.getAverageProfitThousandForHour(),
                 milestone.getMilestone().milestoneAmount,
                 milestone.getDateMilestoneAchieved().toString());
     }

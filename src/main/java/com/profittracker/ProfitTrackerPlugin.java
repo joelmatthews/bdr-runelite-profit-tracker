@@ -2,6 +2,9 @@ package com.profittracker;
 
 import com.google.inject.Provides;
 import javax.inject.Inject;
+
+import com.profittracker.application.MilestoneService;
+import com.profittracker.domain.ProfitProgressState;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 
@@ -93,6 +96,9 @@ public class ProfitTrackerPlugin extends Plugin
 
     @Inject
     private ProfitTrackerOverlay overlay;
+
+    @Inject
+    private MilestoneService milestoneService;
 
     @Override
     protected void startUp() throws Exception
@@ -271,6 +277,9 @@ public class ProfitTrackerPlugin extends Plugin
 
             totalProfit += tickProfit;
             overlay.updateProfitValue(totalProfit);
+
+            long millisecondsElapsed = System.currentTimeMillis() - startTickMillis;
+            milestoneService.checkAndRecordMilestone(client.getLocalPlayer().getName(), totalProfit, millisecondsElapsed);
 
             // generate gold drop
             if (config.goldDrops() && tickProfit != 0)
