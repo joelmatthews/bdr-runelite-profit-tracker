@@ -1,18 +1,15 @@
 package com.profittracker.domain;
 
-import com.profittracker.domain.MilestoneEnum;
-
 import java.util.Date;
-import com.google.gson.Gson;
 
-public class ProfitTrackerMilestoneModel {
+public class MilestoneModel {
     private String rsn;
     private long totalCurrentProfit;
     private String currentProfitPerHour;
     private MilestoneEnum milestone;
     private Date dateMilestoneAchieved;
 
-    public ProfitTrackerMilestoneModel(String rsn, long totalCurrentProfit, String currentProfitPerHour, MilestoneEnum milestone, Date dateMilestoneAchieved) {
+    public MilestoneModel(String rsn, long totalCurrentProfit, String currentProfitPerHour, MilestoneEnum milestone, Date dateMilestoneAchieved) {
         this.rsn = rsn;
         this.totalCurrentProfit = totalCurrentProfit;
         this.currentProfitPerHour = currentProfitPerHour;

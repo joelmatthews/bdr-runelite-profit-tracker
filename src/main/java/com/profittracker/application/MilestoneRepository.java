@@ -1,7 +1,7 @@
 package com.profittracker.application;
 
-import com.profittracker.domain.ProfitTrackerMilestoneModel;
+import com.profittracker.domain.MilestoneModel;
 
 public interface MilestoneRepository {
-    void sendMilestoneData(ProfitTrackerMilestoneModel milestoneData);
+    void sendMilestoneData(MilestoneModel milestoneData);
 }

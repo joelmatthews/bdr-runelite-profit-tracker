@@ -2,8 +2,7 @@ package com.profittracker.infrastructure.repository;
 
 import com.profittracker.application.MilestoneAdapter;
 import com.profittracker.infrastructure.DTO.MilestoneDTO;
-import com.profittracker.application.MilestoneAdapter;
-import com.profittracker.domain.ProfitTrackerMilestoneModel;
+import com.profittracker.domain.MilestoneModel;
 
 public class MilestoneRepositoryImpl implements com.profittracker.application.MilestoneRepository {
     private final MilestoneAdapter adapter;
@@ -12,12 +11,12 @@ public class MilestoneRepositoryImpl implements com.profittracker.application.Mi
         this.adapter = adapter;
     }
 
-    public void sendMilestoneData(ProfitTrackerMilestoneModel milestone) {
+    public void sendMilestoneData(MilestoneModel milestone) {
         MilestoneDTO milestoneDTO = mapMilestoneToDTO(milestone);
         adapter.send(milestoneDTO);
     }
 
-    private MilestoneDTO mapMilestoneToDTO(ProfitTrackerMilestoneModel milestone) {
+    private MilestoneDTO mapMilestoneToDTO(MilestoneModel milestone) {
         return new MilestoneDTO(
                 milestone.getRsn(),
                 milestone.getCurrentProfit(),

@@ -2,6 +2,7 @@ package com.profittracker.infrastructure.adapter;
 
 import com.profittracker.application.MilestoneAdapter;
 import com.profittracker.infrastructure.DTO.MilestoneDTO;
+import com.profittracker.infrastructure.config.Config;
 import okhttp3.*;
 import com.google.gson.Gson;
 
@@ -20,7 +21,7 @@ public class MilestoneAdapterImpl implements MilestoneAdapter {
         RequestBody body = RequestBody.create(JSON, json);
 
         Request request = new Request.Builder()
-                .url(BASE_URL + MILESTONE_ENDPOINT)
+                .url(Config.BASE_URL + MILESTONE_ENDPOINT)
                 .post(body)
                 .build();
 
