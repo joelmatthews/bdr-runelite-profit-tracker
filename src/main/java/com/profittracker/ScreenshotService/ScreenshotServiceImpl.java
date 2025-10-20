@@ -1,11 +1,6 @@
 package com.profittracker.ScreenshotService;
-import com.google.common.base.Strings;
 import net.runelite.api.Client;
-import net.runelite.client.Notifier;
 import net.runelite.client.config.RuneScapeProfileType;
-import net.runelite.client.eventbus.EventBus;
-import net.runelite.client.ui.ClientUI;
-import net.runelite.client.ui.DrawManager;
 import net.runelite.client.util.ImageCapture;
 import net.runelite.client.util.Text;
 
@@ -17,12 +12,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Stream;
 
 import static net.runelite.client.RuneLite.SCREENSHOT_DIR;
 
-public class ScreenshotServiceImpl implements IScreenshotService {
+public class ScreenshotServiceImpl implements ScreenshotService {
 
     private final ImageCapture _imageCapture;
     private final Client _client;
