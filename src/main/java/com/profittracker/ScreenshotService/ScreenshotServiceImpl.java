@@ -29,13 +29,11 @@ public class ScreenshotServiceImpl implements ScreenshotService {
         _client = client;
     }
 
-
-
     // takes and stores a screenshot using client apis (avoid using RuneLiteScreenshotPlugin for now)
     public void takeScreenshot(String type, String player) {
         Date timestamp = new Date();
-        String filename = "type_player_timestamp"; // should name files based on type, like death / bank / kill / loot etc.
-        _imageCapture.takeScreenshot("bdr/", "test", true, true, false );
+        String filename = type + "_" + player + "_" + timestamp; // should name files based on type, like death / bank / kill / loot etc.
+        _imageCapture.takeScreenshot("bdr/", filename, true, true, false );
     }
 
     // returns list of all screenshotPaths
@@ -75,5 +73,4 @@ public class ScreenshotServiceImpl implements ScreenshotService {
 
         return screenshotPaths;
     }
-
 }
