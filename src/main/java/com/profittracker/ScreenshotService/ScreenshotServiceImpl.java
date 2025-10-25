@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import java.util.Date;
 
 import static net.runelite.client.RuneLite.SCREENSHOT_DIR;
 
@@ -31,7 +32,9 @@ public class ScreenshotServiceImpl implements ScreenshotService {
 
 
     // takes and stores a screenshot using client apis (avoid using RuneLiteScreenshotPlugin for now)
-    public void takeScreenshot() {
+    public void takeScreenshot(String type, String player) {
+        Date timestamp = new Date();
+        String filename = "type_player_timestamp"; // should name files based on type, like death / bank / kill / loot etc.
         _imageCapture.takeScreenshot("bdr/", "test", true, true, false );
     }
 
