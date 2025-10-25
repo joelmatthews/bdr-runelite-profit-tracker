@@ -5,6 +5,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 public interface ScreenshotService {
-    public void takeScreenshot();
+    public void takeScreenshot(String type, String player);
     public List<Path> getScreenshotPaths() throws IOException;
 }
