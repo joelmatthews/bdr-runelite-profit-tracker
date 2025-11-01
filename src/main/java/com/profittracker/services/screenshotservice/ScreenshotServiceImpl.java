@@ -42,7 +42,7 @@ public class ScreenshotServiceImpl implements ScreenshotService {
 
         } catch(Exception e) {
             e.printStackTrace();
-            System.out.print("Failed to get screenshot for " + fileName);
+            System.out.print("Screenshot error: " + e.getMessage());
         }
     }
 

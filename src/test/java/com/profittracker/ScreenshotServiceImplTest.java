@@ -1,8 +1,12 @@
 package com.profittracker;
 
+import com.profittracker.adapters.cloudadapter.CloudAdapter;
+import com.profittracker.adapters.cloudadapter.FileSystemAdapter;
 import com.profittracker.services.screenshotservice.ScreenshotService;
 import com.profittracker.services.screenshotservice.ScreenshotServiceImpl;
 import net.runelite.api.Client;
+import net.runelite.api.Player;
+import net.runelite.api.PlayerComposition;
 import net.runelite.client.util.ImageCapture;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
@@ -12,15 +16,25 @@ public class ScreenshotServiceImplTest {
     ScreenshotService _screenshotService;
     ImageCapture _imageCapture = mock(ImageCapture.class);
     Client _client = mock(Client.class);
+    CloudAdapter _cloudAdapter = mock(CloudAdapter.class);
+    FileSystemAdapter _fileSystemAdapter = mock(FileSystemAdapter.class);
+
+
 
 
     @Test
-    public void TakeScreenshotShouldTakeAScreenshotAndStoreInBdrSubDir() {
+    public void takeScreenshot_ShouldTakeAScreenshotAndUploadToCloud() {
         // Arrange
         String type = "bank";
-        String player = "dragonslayer123";
+        String playerName = "dragonslayer123";
+        Player stubbedPlayer = mock(Player.class);
 
-        _screenshotService = new ScreenshotServiceImpl(_imageCapture, _client); // needs dependecies, mock them
+        when(_client.getLocalPlayer()).thenReturn(stubbedPlayer);
+        when(stubbedPlayer.getName()).thenReturn(playerName);
+        when(_fileSystemAdapter.getDirectoryPath()).thenReturn()
+
+
+        _screenshotService = new ScreenshotServiceImpl(_imageCapture, _client, _cloudAdapter, _fileSystemAdapter);
 
         // Act
         _screenshotService.takeScreenshot(type, player);

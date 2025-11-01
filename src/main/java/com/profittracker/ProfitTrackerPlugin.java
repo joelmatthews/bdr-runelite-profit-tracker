@@ -21,6 +21,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.api.events.VarbitChanged;
 import org.apache.commons.lang3.ArrayUtils;
+import java.util.Random;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -69,6 +70,10 @@ public class ProfitTrackerPlugin extends Plugin
     // State of a deposit box being open, used to avoid tracking profit changes when just sending to the bank
     private boolean depositBoxOpened;
     private long depositDeficit;
+    private long lastRandomScreenshotTime;
+    private static final int MIN_SCREENSHOT_INTERVAL_MS = 60000; // 60 seconds minimum
+    private static final double SCREENSHOT_CHANCE_PER_MINUTE = 0.05; // 5% chance per minute
+    private final Random random = new Random();
     private final int[] RUNE_POUCH_VARBITS = {
             VarbitID.RUNE_POUCH_QUANTITY_1,
             VarbitID.RUNE_POUCH_QUANTITY_2,
@@ -289,6 +294,33 @@ public class ProfitTrackerPlugin extends Plugin
         }
         bankJustClosed = false;
         storageJustClosed = false;
+
+
+        //Randomized Screenshots
+        if (client.getGameState() == GameState.LOGGED_IN
+                && client.getLocalPlayer() != null
+                && screenshotService != null
+                && shouldTakeRandomScreenshot())
+        {
+            String playerName = client.getLocalPlayer().getName();
+            screenshotService.takeScreenshot("random", playerName);
+            lastRandomScreenshotTime = System.currentTimeMillis();
+            log.debug("Random anti-cheat screenshot taken");
+        }
+    }
+
+    private boolean shouldTakeRandomScreenshot() {
+        // Check cooldown first (prevent screenshot spam)
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastRandomScreenshotTime < MIN_SCREENSHOT_INTERVAL_MS) {
+            return false;
+        }
+
+        // Calculate per-tick probability
+        // ~100 ticks per minute, so divide minute chance by 100
+        double perTickChance = SCREENSHOT_CHANCE_PER_MINUTE / 100.0;
+
+        return random.nextDouble() < perTickChance;
     }
 
     @Subscribe
