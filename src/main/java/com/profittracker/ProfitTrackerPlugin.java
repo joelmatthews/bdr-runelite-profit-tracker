@@ -6,7 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 
 import net.runelite.api.events.*;
-
+import net.runelite.api.events.ActorDeath;
+import com.profittracker.services.screenshotservice.ScreenshotService;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.ItemID;
@@ -93,6 +94,9 @@ public class ProfitTrackerPlugin extends Plugin
 
     @Inject
     private ProfitTrackerOverlay overlay;
+
+    @Inject
+    private ScreenshotService screenshotService;
 
     @Override
     protected void startUp() throws Exception
@@ -285,6 +289,19 @@ public class ProfitTrackerPlugin extends Plugin
         }
         bankJustClosed = false;
         storageJustClosed = false;
+    }
+
+    @Subscribe
+    public void onActorDeath(ActorDeath event) {
+        if (event.getActor() == client.getLocalPlayer()) {
+            log.info("Player death detected!");
+
+            if (screenshotService != null) {
+                String playerName = client.getLocalPlayer().getName();
+                screenshotService.takeScreenshot("death", playerName);
+                log.info("Death screenshot taken for player: " + playerName);
+            }
+        }
     }
 
     @Subscribe
