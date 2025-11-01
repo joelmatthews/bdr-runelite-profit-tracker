@@ -70,6 +70,7 @@ public class ProfitTrackerPlugin extends Plugin
     // State of a deposit box being open, used to avoid tracking profit changes when just sending to the bank
     private boolean depositBoxOpened;
     private long depositDeficit;
+    //Random Screenshot Vars
     private long lastRandomScreenshotTime;
     private static final int MIN_SCREENSHOT_INTERVAL_MS = 60000; // 60 seconds minimum
     private static final double SCREENSHOT_CHANCE_PER_MINUTE = 0.05; // 5% chance per minute
@@ -339,7 +340,22 @@ public class ProfitTrackerPlugin extends Plugin
     @Subscribe
     public void onWidgetLoaded(WidgetLoaded event)
     {
-        switch (event.getGroupId()) {
+        final int gid = event.getGroupId();
+
+        // Trade confirm screen (detect by known child widget)
+        if (client.getWidget(gid, InterfaceID.Tradeconfirm.TITLE) != null)
+        {
+            snapUI("trade_confirm");
+        }
+
+        // Bank main screen (detect by known child widget)
+        if (client.getWidget(gid, InterfaceID.Bankmain.TITLE) != null)
+        {
+            snapUI("bank_open");
+        }
+
+        // Your existing logic
+        switch (gid) {
             case InterfaceID.GE_COLLECT:
             case InterfaceID.GE_OFFERS:
                 inventoryValueObject.setOffers(client.getGrandExchangeOffers());
@@ -348,15 +364,31 @@ public class ProfitTrackerPlugin extends Plugin
                 }
                 grandExchangeOpened = true;
                 break;
+
             case InterfaceID.BANK_DEPOSIT_IMP:
             case InterfaceID.BANK_DEPOSITBOX:
                 depositBoxOpened = true;
                 break;
+
             case InterfaceID.FARMING_TOOLS:
                 untrackedStorageOpened = true;
                 break;
         }
     }
+
+    private void snapUI(String tag)
+    {
+        if (screenshotService == null) return;
+        Player p = client.getLocalPlayer();
+        if (p == null) return;
+
+        screenshotService.takeScreenshot(tag, p.getName());
+        log.info("{} screenshot taken.", tag);
+    }
+
+
+
+
 
     @Subscribe
     public void onWidgetClosed(WidgetClosed event)
