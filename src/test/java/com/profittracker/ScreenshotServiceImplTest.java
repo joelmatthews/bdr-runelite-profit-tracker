@@ -1,14 +1,19 @@
 package com.profittracker;
 
 import com.profittracker.adapters.cloudadapter.CloudAdapter;
-import com.profittracker.adapters.cloudadapter.FileSystemAdapter;
+import com.profittracker.adapters.filesystem.FileSystemAdapter;
 import com.profittracker.services.screenshotservice.ScreenshotService;
 import com.profittracker.services.screenshotservice.ScreenshotServiceImpl;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
-import net.runelite.api.PlayerComposition;
+import net.runelite.api.WorldType;
 import net.runelite.client.util.ImageCapture;
 import org.junit.Test;
+
+import java.util.EnumSet;
+
+import static net.runelite.client.RuneLite.SCREENSHOT_DIR;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class ScreenshotServiceImplTest {
@@ -19,50 +24,38 @@ public class ScreenshotServiceImplTest {
     CloudAdapter _cloudAdapter = mock(CloudAdapter.class);
     FileSystemAdapter _fileSystemAdapter = mock(FileSystemAdapter.class);
 
-
-
-
-    @Test
-    public void takeScreenshot_ShouldTakeAScreenshotAndUploadToCloud() {
-        // Arrange
-        String type = "bank";
-        String playerName = "dragonslayer123";
-        Player stubbedPlayer = mock(Player.class);
-
-        when(_client.getLocalPlayer()).thenReturn(stubbedPlayer);
-        when(stubbedPlayer.getName()).thenReturn(playerName);
-        when(_fileSystemAdapter.getDirectoryPath()).thenReturn()
-
-
+    public ScreenshotServiceImplTest() {
         _screenshotService = new ScreenshotServiceImpl(_imageCapture, _client, _cloudAdapter, _fileSystemAdapter);
-
-        // Act
-        _screenshotService.takeScreenshot(type, player);
-
-        // Assert
-        verify(_imageCapture).takeScreenshot(
-                eq("bdr/"),
-                contains("bank_dragonslayer123"), // partial match because of timestamp
-                eq(true),
-                eq(true),
-                eq(false)
-        );
     }
 
-    @Test
-    public void getScreenshotPathsShouldReturnListofPaths() {
-        // Arrange
-        _screenshotService = new ScreenshotServiceImpl(_imageCapture, _client, filesystem);
-        List<path> expectedPaths = ["bank_pussycrusher69_timestamp", "death_weedfiend420_timestamp", "loot_goblin55_timestamp"];
+// takeScreenshot is really just orchestration. No real point testing at the unit level.
+//    @Test
+//    public void takeScreenshot_ShouldTakeAScreenshot() {
+//
+//    }
 
-        mockFilesystem.Setup(fs => fs.find("bdr/")).Returns(expectedPaths);
+// same thing, no logic here to test currently. All it does is delegate to fileSystemAdapter
+//    @Test
+//    public void getScreenshotPath_ShouldReturnScreenshotFilePath() {
+//
+//    }
+
+
+    @Test
+    public void getScreenshotDirectory_ShouldReturnADirectoryPathString() {
+        // Arrange
+        Player stubbedPlayer = mock(Player.class);
+        String playerName = "ninja12366";
+        String expectedPlayerDir = playerName + "/" + "bdr/";
+        String expectedDirectory = SCREENSHOT_DIR + "/" + expectedPlayerDir;
+        when (stubbedPlayer.getName()).thenReturn(playerName);
+        when(_client.getLocalPlayer()).thenReturn(stubbedPlayer);
+        when(_client.getWorldType()).thenReturn(EnumSet.noneOf(WorldType.class));
 
         // Act
-        List<path> actualPaths = _screenshotService.getScreenshotPaths(); // this needs refactoring because the file system etc is tightly coupled and we can't mock/stub it
+        String actualDirectory = _screenshotService.getScreenshotDirectory(); // this needs refactoring because the file system etc is tightly coupled and we can't mock/stub it
 
         // Assert
-        assert that expectedPaths[0] is the same as actualPaths[0]
-        assert that expectedPaths[1] is the same as actualPaths[1]
-        assert that expectedPaths[2] is the same as actualPaths[2]
+        assertEquals(expectedDirectory, actualDirectory);
     }
 }

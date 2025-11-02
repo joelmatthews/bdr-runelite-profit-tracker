@@ -1,6 +1,7 @@
 package com.profittracker.services.screenshotservice;
 import com.profittracker.adapters.cloudadapter.CloudAdapter;
-import com.profittracker.adapters.cloudadapter.FileSystemAdapter;
+import com.profittracker.adapters.filesystem.FileSystemAdapter;
+import com.profittracker.adapters.http.HttpAdapter;
 import net.runelite.api.Client;
 import net.runelite.client.config.RuneScapeProfileType;
 import net.runelite.client.util.ImageCapture;
@@ -15,29 +16,29 @@ public class ScreenshotServiceImpl implements ScreenshotService {
 
     private final ImageCapture _imageCapture;
     private final Client _client;
-    private final CloudAdapter _cloudAdapter;
+    private final HttpAdapter _httpAdapter;
     private final FileSystemAdapter _fileSystemAdapter;
 
 
     @Inject
-    public ScreenshotServiceImpl(ImageCapture imageCapture, Client client, CloudAdapter cloudAdapter, FileSystemAdapter fileSystemAdapter) {
+    public ScreenshotServiceImpl(ImageCapture imageCapture, Client client, HttpAdapter httpAdapter, FileSystemAdapter fileSystemAdapter) {
         _imageCapture = imageCapture;
         _client = client;
-        _cloudAdapter = cloudAdapter;
+        _httpAdapter = httpAdapter;
         _fileSystemAdapter = fileSystemAdapter;
     }
 
     public void takeScreenshot(String type, String player) {
-        Date timestamp = new Date();
-        String fileName = type + "_" + player + "_" + timestamp; // should name files based on type, like death / bank / kill / loot etc.
+        String timestamp = new Date().toString().replaceAll(" ", "-");
+        String filename = type + "_" + player + "_" + timestamp; // should name files based on type, like death / bank / kill / loot etc.
 
         try {
-            _imageCapture.takeScreenshot("bdr/", fileName, true, true, false );
+            _imageCapture.takeScreenshot("bdr/", filename, true, true, false );
             String screenshotDir = this.getScreenshotDirectory();
-            String pathToScreenshot = this.getScreenshotPath(screenshotDir, fileName);
+            String pathToScreenshot = this.getScreenshotPath(screenshotDir, filename);
 
             if (pathToScreenshot != null) {
-                _cloudAdapter.upload(pathToScreenshot);
+                _httpAdapter.postAsync(pathToScreenshot); // revisit this, can't just send path to screenshot now. Will probably have to look at sending  base64 encoded string or multipart data
             }
 
         } catch(Exception e) {
@@ -69,7 +70,7 @@ public class ScreenshotServiceImpl implements ScreenshotService {
 
             playerDir += "/" + "bdr/";
 
-            playerBdrFolder = _fileSystemAdapter.getDirectoryPath(SCREENSHOT_DIR.toString(), playerDir);
+            playerBdrFolder = SCREENSHOT_DIR + "/" + playerDir;
 
             return playerBdrFolder;
         }

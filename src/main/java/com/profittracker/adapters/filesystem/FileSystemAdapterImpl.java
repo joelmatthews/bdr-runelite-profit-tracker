@@ -1,4 +1,4 @@
-package com.profittracker.adapters.cloudadapter;
+package com.profittracker.adapters.filesystem;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,11 +26,5 @@ public class FileSystemAdapterImpl implements FileSystemAdapter {
             System.out.print("Failed to get screenshot for " + filename);
             return null;
         }
-    }
-
-    public String getDirectoryPath(String first, String... more) {
-        Path directory = Paths.get(first, more);
-
-        return directory.toString();
     }
 }
