@@ -1,7 +1,7 @@
 package com.profittracker;
 
-import com.profittracker.adapters.cloudadapter.CloudAdapter;
 import com.profittracker.adapters.filesystem.FileSystemAdapter;
+import com.profittracker.adapters.http.HttpAdapter;
 import com.profittracker.services.screenshotservice.ScreenshotService;
 import com.profittracker.services.screenshotservice.ScreenshotServiceImpl;
 import net.runelite.api.Client;
@@ -21,24 +21,12 @@ public class ScreenshotServiceImplTest {
     ScreenshotService _screenshotService;
     ImageCapture _imageCapture = mock(ImageCapture.class);
     Client _client = mock(Client.class);
-    CloudAdapter _cloudAdapter = mock(CloudAdapter.class);
+    HttpAdapter _httpAdapter = mock(HttpAdapter.class);
     FileSystemAdapter _fileSystemAdapter = mock(FileSystemAdapter.class);
 
     public ScreenshotServiceImplTest() {
-        _screenshotService = new ScreenshotServiceImpl(_imageCapture, _client, _cloudAdapter, _fileSystemAdapter);
+        _screenshotService = new ScreenshotServiceImpl(_imageCapture, _client, _httpAdapter, _fileSystemAdapter);
     }
-
-// takeScreenshot is really just orchestration. No real point testing at the unit level.
-//    @Test
-//    public void takeScreenshot_ShouldTakeAScreenshot() {
-//
-//    }
-
-// same thing, no logic here to test currently. All it does is delegate to fileSystemAdapter
-//    @Test
-//    public void getScreenshotPath_ShouldReturnScreenshotFilePath() {
-//
-//    }
 
 
     @Test
@@ -53,7 +41,7 @@ public class ScreenshotServiceImplTest {
         when(_client.getWorldType()).thenReturn(EnumSet.noneOf(WorldType.class));
 
         // Act
-        String actualDirectory = _screenshotService.getScreenshotDirectory(); // this needs refactoring because the file system etc is tightly coupled and we can't mock/stub it
+        String actualDirectory = _screenshotService.getScreenshotDirectory(); // this needs refactoring because the file system etc. is tightly coupled, and we can't mock/stub it
 
         // Assert
         assertEquals(expectedDirectory, actualDirectory);

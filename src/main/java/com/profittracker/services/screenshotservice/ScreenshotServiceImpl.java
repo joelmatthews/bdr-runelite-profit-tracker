@@ -1,5 +1,4 @@
 package com.profittracker.services.screenshotservice;
-import com.profittracker.adapters.cloudadapter.CloudAdapter;
 import com.profittracker.adapters.filesystem.FileSystemAdapter;
 import com.profittracker.adapters.http.HttpAdapter;
 import net.runelite.api.Client;
@@ -8,6 +7,7 @@ import net.runelite.client.util.ImageCapture;
 import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
+import java.nio.file.Path;
 import java.util.Date;
 
 import static net.runelite.client.RuneLite.SCREENSHOT_DIR;
@@ -35,27 +35,15 @@ public class ScreenshotServiceImpl implements ScreenshotService {
         try {
             _imageCapture.takeScreenshot("bdr/", filename, true, true, false );
             String screenshotDir = this.getScreenshotDirectory();
-            String pathToScreenshot = this.getScreenshotPath(screenshotDir, filename);
+            Path screenshotPath = _fileSystemAdapter.getFilePath(screenshotDir, filename);
 
-            if (pathToScreenshot != null) {
-                _httpAdapter.postAsync(pathToScreenshot); // revisit this, can't just send path to screenshot now. Will probably have to look at sending  base64 encoded string or multipart data
+            if (screenshotPath != null) {
+                String encodedFile = _fileSystemAdapter.encodeFileToBase64(screenshotPath);
+                _httpAdapter.postAsync(encodedFile, "/screenshot");
             }
 
         } catch(Exception e) {
-            e.printStackTrace();
             System.out.print("Screenshot error: " + e.getMessage());
-        }
-    }
-
-    public String getScreenshotPath(String directory, String filename) {
-        try {
-            String pathToScreenshot = _fileSystemAdapter.findFilePath(filename, directory);
-
-            return pathToScreenshot;
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            System.out.print("Failed to get screenshot for " + filename);
-            return null;
         }
     }
 

@@ -1,7 +1,11 @@
 package com.profittracker;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Provides;
 import javax.inject.Inject;
+
+import com.profittracker.support.di.ScreenshotModule;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 
@@ -102,11 +106,21 @@ public class ProfitTrackerPlugin extends Plugin
     private ProfitTrackerOverlay overlay;
 
     @Inject
+    private Injector injector;
+
     private ScreenshotService screenshotService;
 
     @Override
     protected void startUp() throws Exception
     {
+        // DI
+        Injector injector = Guice.createInjector(
+                new ScreenshotModule()
+        );
+
+        Injector childInjector = injector.createChildInjector(new ScreenshotModule());
+        screenshotService = childInjector.getInstance(ScreenshotService.class);
+
         // Add the inventory overlay
         overlayManager.add(overlay);
 
@@ -385,10 +399,6 @@ public class ProfitTrackerPlugin extends Plugin
         screenshotService.takeScreenshot(tag, p.getName());
         log.info("{} screenshot taken.", tag);
     }
-
-
-
-
 
     @Subscribe
     public void onWidgetClosed(WidgetClosed event)

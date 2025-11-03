@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.stream.Stream;
 
 public class FileSystemAdapterImpl implements FileSystemAdapter {
 
-    public String findFilePath(String filename, String directory) {
+    public Path getFilePath(String filename, String directory) {
         try {
             Path dir =  Paths.get(directory);
             Stream<Path> stream = Files.find(dir, 1,
@@ -20,10 +21,21 @@ public class FileSystemAdapterImpl implements FileSystemAdapter {
                 throw new IOException();
             }
 
-            return foundFile.toString();
+            return foundFile;
         } catch (Exception exception) {
             exception.printStackTrace();
-            System.out.print("Failed to get screenshot for " + filename);
+            System.out.print("Failed to get file for " + filename);
+            return null;
+        }
+    }
+
+    public String encodeFileToBase64(Path filePath) {
+        try {
+            byte[] fileContent = Files.readAllBytes(filePath);
+            return Base64.getEncoder().encodeToString(fileContent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.print("Failed to encode file for " + filePath.toString());
             return null;
         }
     }
