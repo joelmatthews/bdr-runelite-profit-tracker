@@ -114,10 +114,6 @@ public class ProfitTrackerPlugin extends Plugin
     protected void startUp() throws Exception
     {
         // DI
-        Injector injector = Guice.createInjector(
-                new ScreenshotModule()
-        );
-
         Injector childInjector = injector.createChildInjector(new ScreenshotModule());
         screenshotService = childInjector.getInstance(ScreenshotService.class);
 
