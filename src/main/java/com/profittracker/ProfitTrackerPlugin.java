@@ -307,7 +307,6 @@ public class ProfitTrackerPlugin extends Plugin
         bankJustClosed = false;
         storageJustClosed = false;
 
-
         //Randomized Screenshots
         if (client.getGameState() == GameState.LOGGED_IN
                 && client.getLocalPlayer() != null

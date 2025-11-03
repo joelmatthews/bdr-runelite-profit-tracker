@@ -47,6 +47,8 @@ public class ScreenshotServiceImpl implements ScreenshotService {
         }
     }
 
+    // TODO: can probably look to refactor. If we pass Client object or even just Player object to takeScreenshot then we can pass to this method
+    // meaning we eliminate a dependency on Client in this service
     public String getScreenshotDirectory() {
         if (_client.getLocalPlayer() != null && _client.getLocalPlayer().getName() != null) {
             String playerBdrFolder;
