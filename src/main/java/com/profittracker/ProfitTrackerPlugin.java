@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 
+import com.profittracker.support.di.HttpAdapterModule;
 import com.profittracker.support.di.ScreenshotModule;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -114,7 +115,7 @@ public class ProfitTrackerPlugin extends Plugin
     protected void startUp() throws Exception
     {
         // DI
-        Injector childInjector = injector.createChildInjector(new ScreenshotModule());
+        Injector childInjector = injector.createChildInjector(new HttpAdapterModule(), new ScreenshotModule());
         screenshotService = childInjector.getInstance(ScreenshotService.class);
 
         // Add the inventory overlay
