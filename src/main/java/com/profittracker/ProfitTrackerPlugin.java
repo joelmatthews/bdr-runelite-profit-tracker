@@ -12,6 +12,7 @@ import net.runelite.api.*;
 
 import net.runelite.api.events.*;
 import net.runelite.api.events.ActorDeath;
+import net.runelite.api.events.ChatMessage;
 import com.profittracker.services.screenshotservice.ScreenshotService;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
@@ -90,6 +91,8 @@ public class ProfitTrackerPlugin extends Plugin
             VarbitID.RUNE_POUCH_TYPE_3,
             VarbitID.RUNE_POUCH_TYPE_4
     };
+    private static final int[] LOOT_KEY_IDS = {26651, 26652, 26653, 26654, 26655};
+    private Item[] previousInventoryItems = null;
 
     @Inject
     private Client client;
@@ -347,6 +350,7 @@ public class ProfitTrackerPlugin extends Plugin
         }
     }
 
+
     @Subscribe
     public void onWidgetLoaded(WidgetLoaded event)
     {
@@ -510,6 +514,31 @@ public class ProfitTrackerPlugin extends Plugin
             containerId == InventoryID.WORN) {
             // Inventory has changed - need calculate profit in onGameTick
             inventoryValueChanged = true;
+
+            // Check for Loot Key received
+            if (containerId == InventoryID.INV) {
+                ItemContainer inventoryContainer = event.getItemContainer();
+                if (inventoryContainer != null) {
+                    Item[] currentItems = inventoryContainer.getItems();
+
+                    // Check if a loot key was added (wasn't in previous inventory)
+                    if (previousInventoryItems != null && currentItems != null) {
+                        boolean lootKeyAdded = checkForNewLootKey(previousInventoryItems, currentItems);
+                        if (lootKeyAdded) {
+                            log.info("Loot Key detected in inventory!");
+
+                            if (screenshotService != null && client.getLocalPlayer() != null) {
+                                String playerName = client.getLocalPlayer().getName();
+                                screenshotService.takeScreenshot("loot_key_received", playerName);
+                                log.info("Loot Key screenshot taken for player: " + playerName);
+                            }
+                        }
+                    }
+
+                    // Update previous inventory for next comparison
+                    previousInventoryItems = currentItems.clone();
+                }
+            }
         }
 
         if (containerId == InventoryID.BANK) {
@@ -528,6 +557,36 @@ public class ProfitTrackerPlugin extends Plugin
         if (grandExchangeOpened) {
             grandExchangeValueChanged = true;
         }
+    }
+
+    private boolean checkForNewLootKey(Item[] previousItems, Item[] currentItems) {
+        // Count loot keys in previous inventory
+        int previousLootKeyCount = countLootKeys(previousItems);
+
+        // Count loot keys in current inventory
+        int currentLootKeyCount = countLootKeys(currentItems);
+
+        // Return true if we have more loot keys now than before
+        return currentLootKeyCount > previousLootKeyCount;
+    }
+
+    private int countLootKeys(Item[] items) {
+        int count = 0;
+        for (Item item : items) {
+            if (item != null && isLootKey(item.getId())) {
+                count += item.getQuantity();
+            }
+        }
+        return count;
+    }
+
+    private boolean isLootKey(int itemId) {
+        for (int lootKeyId : LOOT_KEY_IDS) {
+            if (itemId == lootKeyId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Subscribe
