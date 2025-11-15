@@ -41,7 +41,7 @@ public class ScreenshotServiceImplTest {
         when(_client.getWorldType()).thenReturn(EnumSet.noneOf(WorldType.class));
 
         // Act
-        String actualDirectory = _screenshotService.getScreenshotDirectory(); // this needs refactoring because the file system etc. is tightly coupled, and we can't mock/stub it
+        String actualDirectory = _screenshotService.getScreenshotDirectory();
 
         // Assert
         assertEquals(expectedDirectory, actualDirectory);
