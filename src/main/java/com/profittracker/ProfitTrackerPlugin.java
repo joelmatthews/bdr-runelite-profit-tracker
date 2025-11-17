@@ -54,7 +54,7 @@ public class ProfitTrackerPlugin extends Plugin
 
     private long startTickMillis;
     private long activeTicks;
-
+    private boolean wildernessLootChestOpen;
     private boolean skipTickForProfitCalculation;
     private boolean inventoryValueChanged;
     private boolean bankValueChanged;
@@ -499,38 +499,58 @@ public class ProfitTrackerPlugin extends Plugin
         return newProfit;
     }
 
+
     @Subscribe
     public void onItemContainerChanged(ItemContainerChanged event)
     {
-        /*
-        this event tells us when inventory has changed
-        and when banking/equipment event occurred this tick
-         */
+    /*
+    this event tells us when inventory has changed
+    and when banking/equipment event occurred this tick
+     */
         log.debug("onItemContainerChanged container id: " + event.getContainerId());
 
         int containerId = event.getContainerId();
 
         if (containerId == InventoryID.INV ||
-            containerId == InventoryID.WORN) {
+                containerId == InventoryID.WORN)
+        {
             // Inventory has changed - need calculate profit in onGameTick
             inventoryValueChanged = true;
 
-            // Check for Loot Key received
-            if (containerId == InventoryID.INV) {
+            // Loot key gain / loss detection (inventory only)
+            if (containerId == InventoryID.INV)
+            {
                 ItemContainer inventoryContainer = event.getItemContainer();
-                if (inventoryContainer != null) {
+                if (inventoryContainer != null)
+                {
                     Item[] currentItems = inventoryContainer.getItems();
 
-                    // Check if a loot key was added (wasn't in previous inventory)
-                    if (previousInventoryItems != null && currentItems != null) {
-                        boolean lootKeyAdded = checkForNewLootKey(previousInventoryItems, currentItems);
-                        if (lootKeyAdded) {
-                            log.info("Loot Key detected in inventory!");
+                    if (previousInventoryItems != null && currentItems != null)
+                    {
+                        int lootKeyDelta = getLootKeyDelta(previousInventoryItems, currentItems);
 
-                            if (screenshotService != null && client.getLocalPlayer() != null) {
+                        if (lootKeyDelta > 0)
+                        {
+                            // Loot key gained
+                            log.info("Loot Key detected in inventory! (Δ = +{})", lootKeyDelta);
+
+                            if (screenshotService != null && client.getLocalPlayer() != null)
+                            {
                                 String playerName = client.getLocalPlayer().getName();
                                 screenshotService.takeScreenshot("loot_key_received", playerName);
-                                log.info("Loot Key screenshot taken for player: " + playerName);
+                                log.info("Loot Key screenshot taken for player: {}", playerName);
+                            }
+                        }
+                        else if (lootKeyDelta < 0)
+                        {
+                            // Loot key consumed -> very likely chest opened
+                            log.info("Loot Key consumed! (Δ = {}) - chest likely opened", lootKeyDelta);
+
+                            if (screenshotService != null && client.getLocalPlayer() != null)
+                            {
+                                String playerName = client.getLocalPlayer().getName();
+                                screenshotService.takeScreenshot("loot_key_opened", playerName);
+                                log.info("Loot Key opened screenshot taken for player: {}", playerName);
                             }
                         }
                     }
@@ -541,34 +561,35 @@ public class ProfitTrackerPlugin extends Plugin
             }
         }
 
-        if (containerId == InventoryID.BANK) {
+        if (containerId == InventoryID.BANK)
+        {
             bankValueChanged = true;
         }
 
         // In these events, inventory WILL be changed, but we DON'T want to calculate profit!
-        switch (containerId){
+        switch (containerId)
+        {
             case InventoryID.HUNTSMANS_KIT:
             case InventoryID.SEED_VAULT:
             case InventoryID.TACKLE_BOX:
                 skipTickForProfitCalculation = true;
+                break;
         }
 
         // No container event occurs for the GE collection item containers, but inventory does
-        if (grandExchangeOpened) {
+        if (grandExchangeOpened)
+        {
             grandExchangeValueChanged = true;
         }
     }
 
-    private boolean checkForNewLootKey(Item[] previousItems, Item[] currentItems) {
-        // Count loot keys in previous inventory
+
+    private int getLootKeyDelta(Item[] previousItems, Item[] currentItems) {
         int previousLootKeyCount = countLootKeys(previousItems);
-
-        // Count loot keys in current inventory
         int currentLootKeyCount = countLootKeys(currentItems);
-
-        // Return true if we have more loot keys now than before
-        return currentLootKeyCount > previousLootKeyCount;
+        return currentLootKeyCount - previousLootKeyCount; // positive = gained, negative = used
     }
+
 
     private int countLootKeys(Item[] items) {
         int count = 0;
@@ -792,4 +813,9 @@ public class ProfitTrackerPlugin extends Plugin
     {
         goldDropsObject.onScriptPostFired(event);
     }
+
+
+
 }
+
+
