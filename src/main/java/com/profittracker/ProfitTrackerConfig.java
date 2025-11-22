@@ -11,11 +11,21 @@ import net.runelite.client.config.ConfigSection;
 @ConfigGroup("ptconfig")
 public interface ProfitTrackerConfig extends Config
 {
+    /**
+     * Regex for validating League Player IDs.
+     * Example valid ID: 68a0ae63-32a2-4e89-997b-4b26d5950112
+     */
+    String LEAGUE_PLAYER_ID_REGEX =
+            "^[0-9a-fA-F]{8}-" +
+                    "[0-9a-fA-F]{4}-" +
+                    "[0-9a-fA-F]{4}-" +
+                    "[0-9a-fA-F]{4}-" +
+                    "[0-9a-fA-F]{12}$";
 
     @ConfigSection(
             name = "Visual",
             description = "Settings for what the plugin features look like.",
-            position =  0,
+            position = 0,
             closedByDefault = false
     )
     String visualSettings = "Visual";
@@ -23,7 +33,7 @@ public interface ProfitTrackerConfig extends Config
     @ConfigSection(
             name = "Behavior",
             description = "Settings for calculation behavior.",
-            position =  1,
+            position = 1,
             closedByDefault = false
     )
     String behaviorSettings = "Behavior";
@@ -104,5 +114,30 @@ public interface ProfitTrackerConfig extends Config
     {
         return false;
     }
-}
 
+    //LeaguePlayerID─────────────────────────────────────
+
+    @ConfigItem(
+            keyName = "leaguePlayerId",
+            name = "League player ID",
+            description = "Enter your League player ID (e.g. 68a0ae63-32a2-4e89-997b-4b26d5950112).",
+            section = behaviorSettings,
+            position = 10
+    )
+    default String leaguePlayerId()
+    {
+        return "";
+    }
+
+    @ConfigItem(
+            keyName = "leaguePlayerIdStatus",
+            name = "League ID status",
+            description = "Result of the last League player ID validation / submission.",
+            section = behaviorSettings,
+            position = 11
+    )
+    default String leaguePlayerIdStatus()
+    {
+        return "";
+    }
+}

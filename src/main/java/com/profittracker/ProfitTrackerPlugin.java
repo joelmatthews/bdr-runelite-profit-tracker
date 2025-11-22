@@ -9,16 +9,17 @@ import com.profittracker.support.di.HttpAdapterModule;
 import com.profittracker.support.di.ScreenshotModule;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-
 import net.runelite.api.events.*;
 import net.runelite.api.events.ActorDeath;
 import net.runelite.api.events.ChatMessage;
 import com.profittracker.services.screenshotservice.ScreenshotService;
+import com.profittracker.services.leagueservice.LeagueService;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
@@ -29,6 +30,7 @@ import net.runelite.api.events.VarbitChanged;
 import org.apache.commons.lang3.ArrayUtils;
 import java.util.Random;
 
+import java.util.regex.Pattern;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,6 +83,8 @@ public class ProfitTrackerPlugin extends Plugin
     private static final int MIN_SCREENSHOT_INTERVAL_MS = 60000; // 60 seconds minimum
     private static final double SCREENSHOT_CHANCE_PER_MINUTE = 0.05; // 5% chance per minute
     private final Random random = new Random();
+    private static final Pattern LEAGUE_ID_PATTERN =
+            Pattern.compile(ProfitTrackerConfig.LEAGUE_PLAYER_ID_REGEX);
     private final int[] RUNE_POUCH_VARBITS = {
             VarbitID.RUNE_POUCH_QUANTITY_1,
             VarbitID.RUNE_POUCH_QUANTITY_2,
@@ -113,6 +117,12 @@ public class ProfitTrackerPlugin extends Plugin
     private Injector injector;
 
     private ScreenshotService screenshotService;
+
+    @Inject
+    private ConfigManager configManager;
+
+    @Inject
+    private LeagueService leagueService;
 
     @Override
     protected void startUp() throws Exception
@@ -798,7 +808,10 @@ public class ProfitTrackerPlugin extends Plugin
     @Provides
     ProfitTrackerConfig provideConfig(ConfigManager configManager)
     {
+
         return configManager.getConfig(ProfitTrackerConfig.class);
+
+
     }
 
     @Subscribe
@@ -815,6 +828,57 @@ public class ProfitTrackerPlugin extends Plugin
     }
 
 
+    private void setLeaguePlayerIdStatus(String message)
+    {
+        if (configManager != null)
+        {
+            // "ptconfig" = @ConfigGroup in ProfitTrackerConfig
+            // "leaguePlayerIdStatus" = keyName of the status field
+            configManager.setConfiguration("ptconfig", "leaguePlayerIdStatus", message);
+        }
+    }
+
+
+    @Subscribe
+    public void onConfigChanged(ConfigChanged event)
+    {
+        if (!event.getGroup().equals("ptconfig"))
+        {
+            return;
+        }
+
+        if (!event.getKey().equals("leaguePlayerId"))
+        {
+            return;
+        }
+
+        String id = config.leaguePlayerId();
+
+        if (id == null)
+        {
+            setLeaguePlayerIdStatus("Please enter an ID.");
+            return;
+        }
+
+        if (!LEAGUE_ID_PATTERN.matcher(id).matches())
+        {
+            setLeaguePlayerIdStatus("Invalid format. Example: 68a0ae63-32a2-4e89-997b-4b26d5950112");
+            return;
+        }
+
+        try
+        {
+            leagueService.addLeaguePlayerId(id);
+
+            setLeaguePlayerIdStatus("League player ID saved successfully.");
+            log.info("League player ID saved: {}", id);
+        }
+        catch (Exception e)
+        {
+            log.error("Failed to save League player ID", e);
+            setLeaguePlayerIdStatus("Error saving ID. Check logs.");
+        }
+    }
 
 }
 
