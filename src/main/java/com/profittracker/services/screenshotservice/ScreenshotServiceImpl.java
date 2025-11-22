@@ -8,7 +8,7 @@ import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
-import java.util.Date;
+import java.util.*;
 
 import static net.runelite.client.RuneLite.SCREENSHOT_DIR;
 
@@ -39,7 +39,10 @@ public class ScreenshotServiceImpl implements ScreenshotService {
 
             if (screenshotPath != null) {
                 String encodedFile = _fileSystemAdapter.encodeFileToBase64(screenshotPath);
-                _httpAdapter.postAsync(encodedFile, "/screenshot");
+                Map<String, String> content = Map.ofEntries(
+                        Map.entry("screenshot", encodedFile),
+                        Map.entry("playerName", _client.getLocalPlayer().getName()));
+                _httpAdapter.postAsync(content, "/screenshot");
             }
 
         } catch(Exception e) {
