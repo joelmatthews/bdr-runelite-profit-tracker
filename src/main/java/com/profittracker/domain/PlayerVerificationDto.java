@@ -6,6 +6,10 @@ import lombok.Setter;
 import java.util.Date;
 
 public class PlayerVerificationDto {
+
+    public PlayerVerificationDto(String leaguePlayerId) {
+        this.leaguePlayerId = this.setLeaguePlayerId(leaguePlayerId);
+    }
     @Getter
     @Setter
     private String leaguePlayerId;

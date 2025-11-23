@@ -5,5 +5,5 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public interface HttpAdapter {
-    CompletableFuture<Void> postAsync(Map<String, String> content, String endpoint);
+    CompletableFuture<Void> postAsync(Object content, String endpoint);
 }

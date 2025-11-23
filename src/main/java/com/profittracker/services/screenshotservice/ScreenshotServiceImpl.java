@@ -1,6 +1,7 @@
 package com.profittracker.services.screenshotservice;
 import com.profittracker.adapters.filesystem.FileSystemAdapter;
 import com.profittracker.adapters.http.HttpAdapter;
+import com.profittracker.domain.PlayerVerificationDto;
 import net.runelite.api.Client;
 import net.runelite.client.config.RuneScapeProfileType;
 import net.runelite.client.util.ImageCapture;
@@ -39,10 +40,13 @@ public class ScreenshotServiceImpl implements ScreenshotService {
 
             if (screenshotPath != null) {
                 String encodedFile = _fileSystemAdapter.encodeFileToBase64(screenshotPath);
-                Map<String, String> content = Map.ofEntries(
-                        Map.entry("screenshot", encodedFile),
-                        Map.entry("playerName", _client.getLocalPlayer().getName()));
-                _httpAdapter.postAsync(content, "/screenshot");
+
+                PlayerVerificationDto payload =  new PlayerVerificationDto();
+                payload.setLeaguePlayerId(_leagueService.getLeaguePlayerIds());
+                payload.setLeaguePlayerGameName(_client.getLocalPlayer().getName());
+                payload.setScreenshot(encodedFile);
+
+                _httpAdapter.postAsync(payload, "/screenshot");
             }
 
         } catch(Exception e) {

@@ -28,14 +28,10 @@ public class HttpAdapterImpl implements HttpAdapter {
         _config = config;
     }
 
-    public CompletableFuture<Void> postAsync(Map<String, String> content, String endpoint) {
-        PlayerVerificationDto payload =  new PlayerVerificationDto();
-        payload.setLeaguePlayerId(_leagueService.getLeaguePlayerIds());
-        payload.setLeaguePlayerGameName(content.get("playerName"));
-        payload.setScreenshot(content.get("screenshot"));
+    public CompletableFuture<Void> postAsync(Object content, String endpoint) {
 
         try {
-            String json = toJson(payload);
+            String json = toJson(content);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(_config.getBaseUrl() + endpoint))
                     .POST(HttpRequest.BodyPublishers.ofString(json))
