@@ -35,3 +35,11 @@ tasks.withType(JavaCompile) {
 	options.compilerArgs << "-Xlint:unchecked"
 	options.compilerArgs << "-Xlint:deprecation"
 }
+
+task runPlugin(type: JavaExec) {
+	group = 'application'
+	description = 'Run RuneLite with the Profit Tracker plugin'
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'com.profittracker.ProfitTrackerTest'
+	jvmArgs = ['-ea']
+}

@@ -26,6 +26,11 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.Notifier;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.ChatMessageBuilder;
+import net.runelite.client.chat.ChatColorType;
+import net.runelite.client.chat.QueuedMessage;
 import net.runelite.api.events.VarbitChanged;
 import org.apache.commons.lang3.ArrayUtils;
 import java.util.Random;
@@ -117,12 +122,16 @@ public class ProfitTrackerPlugin extends Plugin
     private Injector injector;
 
     private ScreenshotService screenshotService;
+    private LeagueService leagueService;
 
     @Inject
     private ConfigManager configManager;
 
     @Inject
-    private LeagueService leagueService;
+    private Notifier notifier;
+
+    @Inject
+    private ChatMessageManager chatMessageManager;
 
     @Override
     protected void startUp() throws Exception
@@ -130,6 +139,7 @@ public class ProfitTrackerPlugin extends Plugin
         // DI
         Injector childInjector = injector.createChildInjector(new HttpAdapterModule(), new ScreenshotModule());
         screenshotService = childInjector.getInstance(ScreenshotService.class);
+        leagueService = childInjector.getInstance(LeagueService.class);
 
         // Add the inventory overlay
         overlayManager.add(overlay);
@@ -828,16 +838,13 @@ public class ProfitTrackerPlugin extends Plugin
     }
 
 
-    private void setLeaguePlayerIdStatus(String message)
+    private void sendChatMessage(String message, boolean isError)
     {
-        if (configManager != null)
-        {
-            // "ptconfig" = @ConfigGroup in ProfitTrackerConfig
-            // "leaguePlayerIdStatus" = keyName of the status field
-            configManager.setConfiguration("ptconfig", "leaguePlayerIdStatus", message);
-        }
+        chatMessageManager.queue(QueuedMessage.builder()
+                .type(ChatMessageType.CONSOLE)
+                .runeLiteFormattedMessage(message)
+                .build());
     }
-
 
     @Subscribe
     public void onConfigChanged(ConfigChanged event)
@@ -847,36 +854,57 @@ public class ProfitTrackerPlugin extends Plugin
             return;
         }
 
-        if (!event.getKey().equals("leaguePlayerId"))
+        if (!event.getKey().equals("submitLeagueId"))
         {
             return;
         }
+
+        // Auto-uncheck the checkbox
+        configManager.setConfiguration("ptconfig", "submitLeagueId", false);
 
         String id = config.leaguePlayerId();
 
-        if (id == null)
+        if (id == null || id.trim().isEmpty())
         {
-            setLeaguePlayerIdStatus("Please enter an ID.");
+            configManager.setConfiguration("ptconfig", "leagueIdStatus", "❌ Please enter a League player ID first");
+            notifier.notify("Please enter a League player ID first");
+            sendChatMessage("[Profit Tracker] Please enter a League player ID first", true);
             return;
         }
 
-        if (!LEAGUE_ID_PATTERN.matcher(id).matches())
+        if (!LEAGUE_ID_PATTERN.matcher(id.trim()).matches())
         {
-            setLeaguePlayerIdStatus("Invalid format. Example: 68a0ae63-32a2-4e89-997b-4b26d5950112");
+            configManager.setConfiguration("ptconfig", "leagueIdStatus", "❌ Invalid format! Must be UUID like: 68a0ae63-32a2-4e89-997b-4b26d5950112");
+            notifier.notify("Invalid League ID format. Example: 68a0ae63-32a2-4e89-997b-4b26d5950112");
+            sendChatMessage("[Profit Tracker] Invalid League ID format! Example: 68a0ae63-32a2-4e89-997b-4b26d5950112", true);
             return;
         }
 
         try
         {
-            leagueService.addLeaguePlayerId(id);
+            boolean success = leagueService.addLeaguePlayerId(id.trim());
 
-            setLeaguePlayerIdStatus("League player ID saved successfully.");
-            log.info("League player ID saved: {}", id);
+            if (success)
+            {
+                configManager.setConfiguration("ptconfig", "leagueIdStatus", "✅ Saved successfully!");
+                notifier.notify("League player ID saved successfully!");
+                sendChatMessage("[Profit Tracker] League player ID saved successfully!", false);
+                log.info("League player ID saved: {}", id.trim());
+            }
+            else
+            {
+                log.error("Failed to save League player ID - service returned false");
+                configManager.setConfiguration("ptconfig", "leagueIdStatus", "❌ Error saving. File may be corrupted - try deleting leaguedata.json and restart RuneLite.");
+                notifier.notify("Error saving League ID. Check logs for details.");
+                sendChatMessage("[Profit Tracker] Error saving League ID. Check logs for details.", true);
+            }
         }
         catch (Exception e)
         {
             log.error("Failed to save League player ID", e);
-            setLeaguePlayerIdStatus("Error saving ID. Check logs.");
+            configManager.setConfiguration("ptconfig", "leagueIdStatus", "❌ Error saving. Check logs.");
+            notifier.notify("Error saving League ID. Check logs for details.");
+            sendChatMessage("[Profit Tracker] Error saving League ID. Check logs for details.", true);
         }
     }
 

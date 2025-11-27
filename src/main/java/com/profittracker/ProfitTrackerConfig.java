@@ -120,7 +120,7 @@ public interface ProfitTrackerConfig extends Config
     @ConfigItem(
             keyName = "leaguePlayerId",
             name = "League player ID",
-            description = "Enter your League player ID (e.g. 68a0ae63-32a2-4e89-997b-4b26d5950112).",
+            description = "Enter your League player ID (e.g. 68a0ae63-32a2-4e89-997b-4b26d5950112)",
             section = behaviorSettings,
             position = 10
     )
@@ -130,13 +130,25 @@ public interface ProfitTrackerConfig extends Config
     }
 
     @ConfigItem(
-            keyName = "leaguePlayerIdStatus",
-            name = "League ID status",
-            description = "Result of the last League player ID validation / submission.",
+            keyName = "submitLeagueId",
+            name = "✓ Save League ID",
+            description = "Click this checkbox to save your League player ID above",
             section = behaviorSettings,
             position = 11
     )
-    default String leaguePlayerIdStatus()
+    default boolean submitLeagueId()
+    {
+        return false;
+    }
+
+    @ConfigItem(
+            keyName = "leagueIdStatus",
+            name = "⚠ Status (auto-updated, do not edit)",
+            description = "This field is automatically updated when you click Save League ID. Do not edit manually.",
+            section = behaviorSettings,
+            position = 12
+    )
+    default String leagueIdStatus()
     {
         return "";
     }
