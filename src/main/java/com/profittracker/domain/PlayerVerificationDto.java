@@ -4,15 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 public class PlayerVerificationDto {
-
-    public PlayerVerificationDto(String leaguePlayerId) {
-        this.leaguePlayerId = this.setLeaguePlayerId(leaguePlayerId);
-    }
     @Getter
     @Setter
-    private String leaguePlayerId;
+    private List<String> leaguePlayerIds;
 
     @Getter
     @Setter

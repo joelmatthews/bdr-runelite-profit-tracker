@@ -2,6 +2,7 @@ package com.profittracker;
 
 import com.profittracker.adapters.filesystem.FileSystemAdapter;
 import com.profittracker.adapters.http.HttpAdapter;
+import com.profittracker.services.leagueservice.LeagueService;
 import com.profittracker.services.screenshotservice.ScreenshotService;
 import com.profittracker.services.screenshotservice.ScreenshotServiceImpl;
 import net.runelite.api.Client;
@@ -23,9 +24,10 @@ public class ScreenshotServiceImplTest {
     Client _client = mock(Client.class);
     HttpAdapter _httpAdapter = mock(HttpAdapter.class);
     FileSystemAdapter _fileSystemAdapter = mock(FileSystemAdapter.class);
+    LeagueService _leagueService = mock(LeagueService.class);
 
     public ScreenshotServiceImplTest() {
-        _screenshotService = new ScreenshotServiceImpl(_imageCapture, _client, _httpAdapter, _fileSystemAdapter);
+        _screenshotService = new ScreenshotServiceImpl(_imageCapture, _client, _httpAdapter, _fileSystemAdapter, _leagueService);
     }
 
 

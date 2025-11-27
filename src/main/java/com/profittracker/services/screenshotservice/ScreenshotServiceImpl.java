@@ -2,6 +2,7 @@ package com.profittracker.services.screenshotservice;
 import com.profittracker.adapters.filesystem.FileSystemAdapter;
 import com.profittracker.adapters.http.HttpAdapter;
 import com.profittracker.domain.PlayerVerificationDto;
+import com.profittracker.services.leagueservice.LeagueService;
 import net.runelite.api.Client;
 import net.runelite.client.config.RuneScapeProfileType;
 import net.runelite.client.util.ImageCapture;
@@ -19,14 +20,16 @@ public class ScreenshotServiceImpl implements ScreenshotService {
     private final Client _client;
     private final HttpAdapter _httpAdapter;
     private final FileSystemAdapter _fileSystemAdapter;
+    private final LeagueService _leagueService;
 
 
     @Inject
-    public ScreenshotServiceImpl(ImageCapture imageCapture, Client client, HttpAdapter httpAdapter, FileSystemAdapter fileSystemAdapter) {
+    public ScreenshotServiceImpl(ImageCapture imageCapture, Client client, HttpAdapter httpAdapter, FileSystemAdapter fileSystemAdapter, LeagueService leagueService) {
         _imageCapture = imageCapture;
         _client = client;
         _httpAdapter = httpAdapter;
         _fileSystemAdapter = fileSystemAdapter;
+        _leagueService = leagueService;
     }
 
     public void takeScreenshot(String type, String player) {
@@ -42,7 +45,7 @@ public class ScreenshotServiceImpl implements ScreenshotService {
                 String encodedFile = _fileSystemAdapter.encodeFileToBase64(screenshotPath);
 
                 PlayerVerificationDto payload =  new PlayerVerificationDto();
-                payload.setLeaguePlayerId(_leagueService.getLeaguePlayerIds());
+                payload.setLeaguePlayerIds(_leagueService.getLeaguePlayerIds());
                 payload.setLeaguePlayerGameName(_client.getLocalPlayer().getName());
                 payload.setScreenshot(encodedFile);
 

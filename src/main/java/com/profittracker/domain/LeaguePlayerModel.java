@@ -12,24 +12,24 @@ public class LeaguePlayerModel {
     public List<String> leaguePlayerIds =  new ArrayList<>();
     public Date lastUpdated = new Date();
 
-    public String toJson() throws JsonProcessingException {
-        try {
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            return ow.writeValueAsString(this);
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        return "";
-    }
-
-    public LeaguePlayerModel fromJson(String json) throws JsonProcessingException {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(json, LeaguePlayerModel.class);
-        } catch (Exception e) {
-
-        }
-        return null;
-    }
+//    public String toJson() throws JsonProcessingException {
+//        try {
+//            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+//            return ow.writeValueAsString(this);
+//        }
+//        catch (Exception e) {
+//            System.out.println(e.getMessage());
+//        }
+//        return "";
+//    }
+//
+//    public LeaguePlayerModel fromJson(String json) throws JsonProcessingException {
+//        try {
+//            ObjectMapper mapper = new ObjectMapper();
+//            return mapper.readValue(json, LeaguePlayerModel.class);
+//        } catch (Exception e) {
+//
+//        }
+//        return null;
+//    }
 }
