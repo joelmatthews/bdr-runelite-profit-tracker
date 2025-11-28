@@ -141,6 +141,7 @@ public class ProfitTrackerPlugin extends Plugin
         screenshotService = childInjector.getInstance(ScreenshotService.class);
         leagueService = childInjector.getInstance(LeagueService.class);
 
+
         // Add the inventory overlay
         overlayManager.add(overlay);
 
@@ -849,6 +850,8 @@ public class ProfitTrackerPlugin extends Plugin
     @Subscribe
     public void onConfigChanged(ConfigChanged event)
     {
+        log.debug("Config changed - Group: {}, Key: {}, Value: {}", event.getGroup(), event.getKey(), event.getNewValue());
+
         if (!event.getGroup().equals("ptconfig"))
         {
             return;
@@ -859,6 +862,14 @@ public class ProfitTrackerPlugin extends Plugin
             return;
         }
 
+        // Only process when checkbox is checked (true), ignore when it's unchecked (false)
+        if (!"true".equals(event.getNewValue()))
+        {
+            return;
+        }
+
+        log.info("Submit League ID checkbox clicked!");
+
         // Auto-uncheck the checkbox
         configManager.setConfiguration("ptconfig", "submitLeagueId", false);
 
@@ -866,17 +877,15 @@ public class ProfitTrackerPlugin extends Plugin
 
         if (id == null || id.trim().isEmpty())
         {
-            configManager.setConfiguration("ptconfig", "leagueIdStatus", "❌ Please enter a League player ID first");
             notifier.notify("Please enter a League player ID first");
-            sendChatMessage("[Profit Tracker] Please enter a League player ID first", true);
+            sendChatMessage("[Profit Tracker] ❌ Please enter a League player ID first", true);
             return;
         }
 
         if (!LEAGUE_ID_PATTERN.matcher(id.trim()).matches())
         {
-            configManager.setConfiguration("ptconfig", "leagueIdStatus", "❌ Invalid format! Must be UUID like: 68a0ae63-32a2-4e89-997b-4b26d5950112");
             notifier.notify("Invalid League ID format. Example: 68a0ae63-32a2-4e89-997b-4b26d5950112");
-            sendChatMessage("[Profit Tracker] Invalid League ID format! Example: 68a0ae63-32a2-4e89-997b-4b26d5950112", true);
+            sendChatMessage("[Profit Tracker] ❌ Invalid League ID format! Example: 68a0ae63-32a2-4e89-997b-4b26d5950112", true);
             return;
         }
 
@@ -886,25 +895,29 @@ public class ProfitTrackerPlugin extends Plugin
 
             if (success)
             {
-                configManager.setConfiguration("ptconfig", "leagueIdStatus", "✅ Saved successfully!");
-                notifier.notify("League player ID saved successfully!");
-                sendChatMessage("[Profit Tracker] League player ID saved successfully!", false);
-                log.info("League player ID saved: {}", id.trim());
+                notifier.notify("League player ID added successfully!");
+                sendChatMessage("[Profit Tracker] ✅ League player ID added successfully!", false);
+                log.info("League player ID added: {}", id.trim());
+
+                // Clear the input field after successful submission
+                configManager.setConfiguration("ptconfig", "leaguePlayerId", "");
             }
             else
             {
-                log.error("Failed to save League player ID - service returned false");
-                configManager.setConfiguration("ptconfig", "leagueIdStatus", "❌ Error saving. File may be corrupted - try deleting leaguedata.json and restart RuneLite.");
-                notifier.notify("Error saving League ID. Check logs for details.");
-                sendChatMessage("[Profit Tracker] Error saving League ID. Check logs for details.", true);
+                // ID already exists (duplicate)
+                notifier.notify("League player ID already exists in the list");
+                sendChatMessage("[Profit Tracker] ℹ️ League player ID already exists in the list (not added again)", false);
+                log.info("League player ID already exists: {}", id.trim());
+
+                // Clear the input field even if it's a duplicate
+                configManager.setConfiguration("ptconfig", "leaguePlayerId", "");
             }
         }
         catch (Exception e)
         {
             log.error("Failed to save League player ID", e);
-            configManager.setConfiguration("ptconfig", "leagueIdStatus", "❌ Error saving. Check logs.");
-            notifier.notify("Error saving League ID. Check logs for details.");
-            sendChatMessage("[Profit Tracker] Error saving League ID. Check logs for details.", true);
+            notifier.notify("Error saving League ID: " + e.getMessage());
+            sendChatMessage("[Profit Tracker] ❌ Error saving League ID: " + e.getMessage(), true);
         }
     }
 

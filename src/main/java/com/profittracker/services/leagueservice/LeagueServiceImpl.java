@@ -37,6 +37,12 @@ public class LeagueServiceImpl implements LeagueService {
 
             if (existingFilePath != null) {
                 leagueData = mapper.readValue(existingFilePath.toFile(), LeaguePlayerModel.class);
+
+                // Check if ID already exists
+                if (leagueData.leaguePlayerIds.contains(id)) {
+                    return false; // ID already exists
+                }
+
                 leagueData.leaguePlayerIds.add(id);
                 filePath = existingFilePath;
             } else {
@@ -53,7 +59,7 @@ public class LeagueServiceImpl implements LeagueService {
             }
 
             leagueData.lastUpdated = new Date();
-            mapper.writeValue(filePath.toFile(), leagueData);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(filePath.toFile(), leagueData);
 
             return true;
         } catch (Exception e) {
