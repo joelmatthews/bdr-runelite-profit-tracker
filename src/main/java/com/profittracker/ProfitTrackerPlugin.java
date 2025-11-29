@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static net.runelite.client.RuneLite.RUNELITE_DIR;
+
 @Slf4j
 @PluginDescriptor(
         name = "Profit Tracker",
@@ -83,8 +85,6 @@ public class ProfitTrackerPlugin extends Plugin
     private static final int MIN_SCREENSHOT_INTERVAL_MS = 60000; // 60 seconds minimum
     private static final double SCREENSHOT_CHANCE_PER_MINUTE = 0.05; // 5% chance per minute
     private final Random random = new Random();
-    private static final Pattern LEAGUE_ID_PATTERN =
-            Pattern.compile(ProfitTrackerConfig.LEAGUE_PLAYER_ID_REGEX);
     private final int[] RUNE_POUCH_VARBITS = {
             VarbitID.RUNE_POUCH_QUANTITY_1,
             VarbitID.RUNE_POUCH_QUANTITY_2,
@@ -853,18 +853,6 @@ public class ProfitTrackerPlugin extends Plugin
         }
 
         String id = config.leaguePlayerId();
-
-        if (id == null)
-        {
-            setLeaguePlayerIdStatus("Please enter an ID.");
-            return;
-        }
-
-        if (!LEAGUE_ID_PATTERN.matcher(id).matches())
-        {
-            setLeaguePlayerIdStatus("Invalid format. Example: 68a0ae63-32a2-4e89-997b-4b26d5950112");
-            return;
-        }
 
         try
         {

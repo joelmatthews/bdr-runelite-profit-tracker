@@ -2,13 +2,6 @@ package com.profittracker;
 
 import com.profittracker.adapters.filesystem.FileSystemAdapter;
 import com.profittracker.adapters.filesystem.FileSystemAdapterImpl;
-import com.profittracker.adapters.http.HttpAdapter;
-import com.profittracker.services.screenshotservice.ScreenshotService;
-import com.profittracker.services.screenshotservice.ScreenshotServiceImpl;
-import net.runelite.api.Client;
-import net.runelite.api.Player;
-import net.runelite.api.WorldType;
-import net.runelite.client.util.ImageCapture;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -20,12 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
-
-import static net.runelite.client.RuneLite.SCREENSHOT_DIR;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 public class FileSystemAdapterImplTest {
 

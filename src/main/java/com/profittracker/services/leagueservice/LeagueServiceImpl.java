@@ -1,38 +1,55 @@
 package com.profittracker.services.leagueservice;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.profittracker.adapters.filesystem.FileSystemAdapter;
+import com.profittracker.domain.BdrFileType;
 import com.profittracker.domain.LeaguePlayerModel;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-
-import static net.runelite.client.RuneLite.RUNELITE_DIR;
+import java.util.UUID;
 
 public class LeagueServiceImpl implements LeagueService {
 
-    FileSystemAdapter _fileSystemAdapter;
 
-    public LeagueServiceImpl(FileSystemAdapter fileSystemAdapter) {
+//    private static final String LEAGUE_PLAYER_ID_REGEX =
+//            "^[0-9a-fA-F]{8}-" +
+//                    "[0-9a-fA-F]{4}-" +
+//                    "[0-9a-fA-F]{4}-" +
+//                    "[0-9a-fA-F]{4}-" +
+//                    "[0-9a-fA-F]{12}$";
+//
+//    private static final Pattern LEAGUE_ID_PATTERN =
+//            Pattern.compile(LEAGUE_PLAYER_ID_REGEX);
+
+    private final FileSystemAdapter _fileSystemAdapter;
+    private final ObjectMapper _mapper;
+
+    public LeagueServiceImpl(FileSystemAdapter fileSystemAdapter, ObjectMapper mapper) {
         this._fileSystemAdapter = fileSystemAdapter;
+        this._mapper = mapper;
     }
 
     @Override
-    public boolean addLeaguePlayerId(String id) throws IOException {
-        String directory = RUNELITE_DIR + "/bdr/" + "leaguedata";
-
+    public String addLeaguePlayerId(String id) throws IOException, IllegalArgumentException {
         try {
-            Path existingFilePath = _fileSystemAdapter.getFilePath("leagedata.json", directory);
-            ObjectMapper mapper = new ObjectMapper();
+            validateLeaguePlayerId(id);
+            Path leagueDataFilePath = Paths.get("leaguedata.json");
+            Path existingFilePath = _fileSystemAdapter.getFilePath(leagueDataFilePath.toString(), BdrFileType.LEAGUEDATA);
 
             LeaguePlayerModel leagueData;
 
             if (existingFilePath != null) {
-                leagueData = mapper.readValue(existingFilePath.toFile(), LeaguePlayerModel.class);
+                leagueData = _mapper.readValue(existingFilePath.toFile(), LeaguePlayerModel.class);
+
+                if (leagueData.leaguePlayerIds.contains(id)) {
+                    throw new IllegalArgumentException("League player id " + id + " already exists in leagueData");
+                }
+
                 leagueData.leaguePlayerIds.add(id);
             } else {
                 leagueData = new LeaguePlayerModel();
@@ -40,26 +57,29 @@ public class LeagueServiceImpl implements LeagueService {
             }
 
             leagueData.lastUpdated = new Date();
-            mapper.writeValue(existingFilePath.toFile(), leagueData);
+            Path resolvedPath = BdrFileType.LEAGUEDATA.getPath().resolve(leagueDataFilePath);
+            _mapper.writeValue(resolvedPath.toFile(), leagueData);
 
-            return true;
+            // confirm JSON was written to the file and return the JSON
+            JsonNode json = _mapper.readTree(resolvedPath.toFile());
+            String jsonString = _mapper.writeValueAsString(json);
+
+            return jsonString;
         } catch (Exception e) {
-            return false;
+            System.out.print(e.getMessage());
+            throw e;
         }
     }
 
     @Override
     public List<String> getLeaguePlayerIds() throws IOException {
-        String directory = RUNELITE_DIR + "/bdr/" + "leaguedata";
-
         try {
-            Path existingFilePath = _fileSystemAdapter.getFilePath("leagedata.json", directory);
-            ObjectMapper mapper = new ObjectMapper();
+            Path existingFilePath = _fileSystemAdapter.getFilePath("leagedata.json", BdrFileType.LEAGUEDATA);
 
             LeaguePlayerModel leagueData;
 
             if (existingFilePath != null) {
-                leagueData = mapper.readValue(existingFilePath.toFile(), LeaguePlayerModel.class);
+                leagueData = _mapper.readValue(existingFilePath.toFile(), LeaguePlayerModel.class);
                 return leagueData.leaguePlayerIds;
             }
 
@@ -70,4 +90,17 @@ public class LeagueServiceImpl implements LeagueService {
         }
     }
 
+    @Override
+    public void validateLeaguePlayerId(String id) throws IllegalArgumentException {
+        if (id == null)
+        {
+            throw new IllegalArgumentException("Please enter a valid ID");
+        }
+
+        try {
+            UUID.fromString(id);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid format. Good Example: 68a0ae63-32a2-4e89-997b-4b26d5950112");
+        }
+    }
 }

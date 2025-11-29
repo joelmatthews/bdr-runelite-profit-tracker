@@ -1,5 +1,7 @@
 package com.profittracker.adapters.filesystem;
 
+import com.profittracker.domain.BdrFileType;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,11 +9,11 @@ import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.stream.Stream;
 
-public class FileSystemAdapterImpl implements FileSystemAdapter {
+public class  FileSystemAdapterImpl implements FileSystemAdapter<BdrFileType> {
 
-    public Path getFilePath(String filename, String directory) {
+    public Path getFilePath(String filename, BdrFileType fileType) {
         try {
-            Path dir =  Paths.get(directory);
+            Path dir = fileType.getPath();
             Stream<Path> stream = Files.find(dir, 1,
                     (path, basicFileAttributes) -> path.getFileName().toString().equalsIgnoreCase(filename));
 

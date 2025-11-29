@@ -1,6 +1,7 @@
 package com.profittracker.services.screenshotservice;
 import com.profittracker.adapters.filesystem.FileSystemAdapter;
 import com.profittracker.adapters.http.HttpAdapter;
+import com.profittracker.domain.BdrFileType;
 import com.profittracker.domain.PlayerVerificationDto;
 import com.profittracker.services.leagueservice.LeagueService;
 import net.runelite.api.Client;
@@ -38,8 +39,7 @@ public class ScreenshotServiceImpl implements ScreenshotService {
 
         try {
             _imageCapture.takeScreenshot("bdr/", filename, true, true, false );
-            String screenshotDir = this.getScreenshotDirectory();
-            Path screenshotPath = _fileSystemAdapter.getFilePath(screenshotDir, filename);
+            Path screenshotPath = _fileSystemAdapter.getFilePath(filename, BdrFileType.SCREENSHOT);
 
             if (screenshotPath != null) {
                 String encodedFile = _fileSystemAdapter.encodeFileToBase64(screenshotPath);
