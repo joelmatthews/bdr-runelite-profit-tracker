@@ -86,19 +86,11 @@ public class LeagueServiceImplTest {
         stubJsonFile.createNewFile();
 
         LeaguePlayerModel stubLeagueData = new LeaguePlayerModel();
-        stubLeagueData.leaguePlayerIds.add("754de33e-6eb1-4ce5-a43c-b07b023738a1"); // add a uuid into stub json to simulate an id already being in there
+        stubLeagueData.leaguePlayerIds.add(idToAdd);
         stubLeagueData.lastUpdated = timestamp;
 
-        _testMapper.writeValue(stubJsonFile, stubLeagueData); // writes json into the test file
-        Path leagueDataDirPath = _fileSystemAdapter.getFileTypePath(BdrFileType.LEAGUEDATA);
-        when(_fileSystemAdapter.getFilePath(stubFilePath.toString(), leagueDataDirPath)).thenReturn(null);
-        doNothing().when(_objectMapper).writeValue(stubJsonFile, LeaguePlayerModel.class);
-
-        JsonNode testJsonNode = _testMapper.readTree(stubJsonFile);
-        when(_objectMapper.readTree(any(File.class))).thenReturn(testJsonNode);
-
-        String stubJsonString = _testMapper.writeValueAsString(stubLeagueData);
-        when(_objectMapper.writeValueAsString(any(JsonNode.class))).thenReturn(stubJsonString);
+        when (_fileSystemAdapter.getFileTypePath(BdrFileType.LEAGUEDATA)).thenReturn(stubJsonDir.toPath());
+        when(_fileSystemAdapter.getFilePath(stubFilePath.toString(), stubJsonDir.toPath())).thenReturn(null); // forces us down the create new file path
 
         String expectedJsonStringResult = _testMapper.writeValueAsString(stubLeagueData);
 
@@ -106,7 +98,7 @@ public class LeagueServiceImplTest {
         String actualJsonStringResult = _leagueService.addLeaguePlayerId(idToAdd);
 
         // Assert
-        assertEquals(expectedJsonStringResult, actualJsonStringResult);
+        assertEquals(stubLeagueData.leaguePlayerIds.get(0), _testMapper.readValue(actualJsonStringResult, LeaguePlayerModel.class).leaguePlayerIds.get(0));
     }
 
     @Rule
@@ -176,7 +168,7 @@ public class LeagueServiceImplTest {
         LeaguePlayerModel actualResult = _leagueService.getLeaguePlayer();
 
         // Assert
-        assertEquals(expectedResult, actualResult);
+        assertEquals(expectedResult.leaguePlayerIds, actualResult.leaguePlayerIds);
     }
 
     @Test

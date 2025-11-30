@@ -43,11 +43,11 @@ public class LeagueServiceImpl implements LeagueService {
             Path leagueDataDirPath = _fileSystemAdapter.getFileTypePath(BdrFileType.LEAGUEDATA);
 
             Path existingFilePath = _fileSystemAdapter.getFilePath(leagueDataFilePath.toString(), leagueDataDirPath);
-            File newFile = leagueDataFilePath.resolve(leagueDataFilePath).toFile();
 
             // if exstingFilePath is null, the file does not exist
-            // if the file does not exist, create an empty leaguedata.json file
             if (existingFilePath == null) {
+                // if the file does not exist, create an empty leaguedata.json file
+                File newFile = leagueDataDirPath.resolve(leagueDataFilePath).toFile();
                 LeaguePlayerModel leagueData = new LeaguePlayerModel();
                 leagueData.lastUpdated = new Date();
                 leagueData.leaguePlayerIds.add(id);
