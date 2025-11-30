@@ -2,6 +2,7 @@ package com.profittracker.adapters.filesystem;
 
 import com.profittracker.domain.BdrFileType;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,10 +11,18 @@ import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.stream.Stream;
 
+import static net.runelite.client.RuneLite.RUNELITE_DIR;
+import static net.runelite.client.RuneLite.SCREENSHOT_DIR;
+
 public class  FileSystemAdapterImpl implements FileSystemAdapter {
 
     private final File _runeliteDir;
     private final File _screenshotDir;
+
+    @Inject
+    public FileSystemAdapterImpl() {
+        this(RUNELITE_DIR, SCREENSHOT_DIR);
+    }
 
     public FileSystemAdapterImpl(File runeliteDir, File screenshotDir) {
         this._runeliteDir = runeliteDir;

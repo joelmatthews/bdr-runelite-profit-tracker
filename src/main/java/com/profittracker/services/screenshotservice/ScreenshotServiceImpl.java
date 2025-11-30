@@ -34,7 +34,7 @@ public class ScreenshotServiceImpl implements ScreenshotService {
     }
 
     public void takeScreenshot(String type, String player) {
-        String timestamp = new Date().toString().replaceAll(" ", "-");
+        String timestamp = new Date().toString().replaceAll(" ", "-").replaceAll(":", "-");
         String filename = type + "_" + player + "_" + timestamp; // should name files based on type, like death / bank / kill / loot etc.
 
         try {
