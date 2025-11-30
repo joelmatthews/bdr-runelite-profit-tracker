@@ -6,7 +6,7 @@ import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 
 /**
- * The ProfitTrackerConfig class is used to provide user preferences to the ProfitTrackerPlugin.
+ * The ProfitTrackerConfig class is used to provide user preferences to the Pthe feerofitTrackerPlugin.
  */
 @ConfigGroup("ptconfig")
 public interface ProfitTrackerConfig extends Config
@@ -120,7 +120,7 @@ public interface ProfitTrackerConfig extends Config
     @ConfigItem(
             keyName = "leaguePlayerId",
             name = "League player ID",
-            description = "Enter your League player ID (e.g. 68a0ae63-32a2-4e89-997b-4b26d5950112).",
+            description = "Enter your League player ID (e.g. 68a0ae63-32a2-4e89-997b-4b26d5950112)",
             section = behaviorSettings,
             position = 10
     )
@@ -130,13 +130,25 @@ public interface ProfitTrackerConfig extends Config
     }
 
     @ConfigItem(
-            keyName = "leaguePlayerIdStatus",
-            name = "League ID status",
-            description = "Result of the last League player ID validation / submission.",
+            keyName = "submitLeagueId",
+            name = "✓ Save League ID",
+            description = "Click to save your League player ID. Validation results and status messages will appear in the in-game chat log and as desktop notifications.",
             section = behaviorSettings,
             position = 11
     )
-    default String leaguePlayerIdStatus()
+    default boolean submitLeagueId()
+    {
+        return false;
+    }
+
+    @ConfigItem(
+            keyName = "leagueIdNote",
+            name = "ℹ️ Check in-game chat for validation status",
+            description = "After clicking Save, validation results will appear in your in-game chat log.",
+            section = behaviorSettings,
+            position = 12
+    )
+    default String leagueIdNote()
     {
         return "";
     }

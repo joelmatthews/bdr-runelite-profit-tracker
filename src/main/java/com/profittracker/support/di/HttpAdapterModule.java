@@ -7,6 +7,6 @@ public class HttpAdapterModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(Config.class).to(Config.class);
+        // Config binding removed - self-binding is not needed
     }
 }
