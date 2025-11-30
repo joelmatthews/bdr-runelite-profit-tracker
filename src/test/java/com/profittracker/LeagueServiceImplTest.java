@@ -55,26 +55,22 @@ public class LeagueServiceImplTest {
         stubLeagueData.lastUpdated = timestamp;
 
         _testMapper.writeValue(stubJsonFile, stubLeagueData); // writes json into the test file
-        when(_objectMapper.readValue(stubJsonFile, LeaguePlayerModel.class)).thenReturn(stubLeagueData); // injected mapper returns stub data that we just added to test file
         when(_fileSystemAdapter.getFileTypePath(BdrFileType.LEAGUEDATA)).thenReturn(stubJsonDir.toPath());
         when(_fileSystemAdapter.getFilePath(stubFilePath.toString(), stubJsonDir.toPath())).thenReturn(stubJsonFile.toPath());
-        doNothing().when(_objectMapper).writeValue(stubJsonFile, LeaguePlayerModel.class);
+
 
         JsonNode testJsonNode = _testMapper.readTree(stubJsonFile);
-        when(_objectMapper.readTree(any(File.class))).thenReturn(testJsonNode);
 
         String stubJsonString = _testMapper.writeValueAsString(stubLeagueData);
-        when(_objectMapper.writeValueAsString(any(JsonNode.class))).thenReturn(stubJsonString);
 
         stubLeagueData.leaguePlayerIds.add(idToAdd);
-
         String expectedJsonStringResult = _testMapper.writeValueAsString(stubLeagueData);
 
         // Act
         String actualJsonStringResult = _leagueService.addLeaguePlayerId(idToAdd);
 
         // Assert
-        assertEquals(_testMapper.readValue(, LeaguePlayerModel.class);, actualJsonStringResult);
+        assertEquals(_testMapper.readValue(expectedJsonStringResult, LeaguePlayerModel.class).leaguePlayerIds, _testMapper.readValue(actualJsonStringResult, LeaguePlayerModel.class).leaguePlayerIds);
         System.out.print(actualJsonStringResult);
     }
 
