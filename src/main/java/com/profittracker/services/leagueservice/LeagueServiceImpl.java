@@ -38,33 +38,39 @@ public class LeagueServiceImpl implements LeagueService {
     public String addLeaguePlayerId(String id) throws IOException, IllegalArgumentException {
         try {
             validateLeaguePlayerId(id);
+
             Path leagueDataFilePath = Paths.get("leaguedata.json");
-            Path existingFilePath = _fileSystemAdapter.getFilePath(leagueDataFilePath.toString(), BdrFileType.LEAGUEDATA);
+            Path leagueDataDirPath = _fileSystemAdapter.getFileTypePath(BdrFileType.LEAGUEDATA);
 
-            LeaguePlayerModel leagueData;
+            Path existingFilePath = _fileSystemAdapter.getFilePath(leagueDataFilePath.toString(), leagueDataDirPath);
+            File newFile = leagueDataFilePath.resolve(leagueDataFilePath).toFile();
 
-            if (existingFilePath != null) {
-                leagueData = _mapper.readValue(existingFilePath.toFile(), LeaguePlayerModel.class);
+            // if exstingFilePath is null, the file does not exist
+            // if the file does not exist, create an empty leaguedata.json file
+            if (existingFilePath == null) {
+                LeaguePlayerModel leagueData = new LeaguePlayerModel();
+                leagueData.lastUpdated = new Date();
+                leagueData.leaguePlayerIds.add(id);
+                _mapper.writeValue(newFile, leagueData);
+                JsonNode json = _mapper.readTree(newFile);
+                String jsonString = _mapper.writeValueAsString(json);
+                return jsonString;
+            } else if(existingFilePath != null) {
+                LeaguePlayerModel leagueData = _mapper.readValue(existingFilePath.toFile(), LeaguePlayerModel.class);
 
                 if (leagueData.leaguePlayerIds.contains(id)) {
                     throw new IllegalArgumentException("League player id " + id + " already exists in leagueData");
                 }
 
+                leagueData.lastUpdated = new Date();
                 leagueData.leaguePlayerIds.add(id);
-            } else {
-                leagueData = new LeaguePlayerModel();
-                leagueData.leaguePlayerIds.add(id);
+                _mapper.writeValue(existingFilePath.toFile(), leagueData);
+                JsonNode json = _mapper.readTree(existingFilePath.toFile());
+                String jsonString = _mapper.writeValueAsString(json);
+                return jsonString;
             }
 
-            leagueData.lastUpdated = new Date();
-            Path resolvedPath = BdrFileType.LEAGUEDATA.getPath().resolve(leagueDataFilePath);
-            _mapper.writeValue(resolvedPath.toFile(), leagueData);
-
-            // confirm JSON was written to the file and return the JSON
-            JsonNode json = _mapper.readTree(resolvedPath.toFile());
-            String jsonString = _mapper.writeValueAsString(json);
-
-            return jsonString;
+            return null;
         } catch (Exception e) {
             System.out.print(e.getMessage());
             throw e;
@@ -72,21 +78,23 @@ public class LeagueServiceImpl implements LeagueService {
     }
 
     @Override
-    public List<String> getLeaguePlayerIds() throws IOException {
+    public LeaguePlayerModel getLeaguePlayer() throws IOException {
         try {
-            Path existingFilePath = _fileSystemAdapter.getFilePath("leagedata.json", BdrFileType.LEAGUEDATA);
+            Path leagueDataFilePath = Paths.get("leaguedata.json");
+            Path leagueDataDirPath = _fileSystemAdapter.getFileTypePath(BdrFileType.LEAGUEDATA);
+            Path existingFilePath = _fileSystemAdapter.getFilePath(leagueDataFilePath.toString(), leagueDataDirPath);
 
             LeaguePlayerModel leagueData;
 
             if (existingFilePath != null) {
                 leagueData = _mapper.readValue(existingFilePath.toFile(), LeaguePlayerModel.class);
-                return leagueData.leaguePlayerIds;
+                return leagueData;
             }
 
             return null;
         } catch (Exception e) {
             System.out.print("LeagueService error: " + e.getMessage());
-            return null;
+            throw e;
         }
     }
 
@@ -94,7 +102,7 @@ public class LeagueServiceImpl implements LeagueService {
     public void validateLeaguePlayerId(String id) throws IllegalArgumentException {
         if (id == null)
         {
-            throw new IllegalArgumentException("Please enter a valid ID");
+            throw new IllegalArgumentException("ID was Null. Please enter a valid ID");
         }
 
         try {

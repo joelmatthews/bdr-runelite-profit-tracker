@@ -39,13 +39,14 @@ public class ScreenshotServiceImpl implements ScreenshotService {
 
         try {
             _imageCapture.takeScreenshot("bdr/", filename, true, true, false );
-            Path screenshotPath = _fileSystemAdapter.getFilePath(filename, BdrFileType.SCREENSHOT);
+            Path screenshotDir = _fileSystemAdapter.getFileTypePath(BdrFileType.SCREENSHOT);
+            Path screenshotPath = _fileSystemAdapter.getFilePath(filename, screenshotDir);
 
             if (screenshotPath != null) {
                 String encodedFile = _fileSystemAdapter.encodeFileToBase64(screenshotPath);
 
                 PlayerVerificationDto payload =  new PlayerVerificationDto();
-                payload.setLeaguePlayerIds(_leagueService.getLeaguePlayerIds());
+                payload.setLeaguePlayerIds(_leagueService.getLeaguePlayer().leaguePlayerIds);
                 payload.setLeaguePlayerGameName(_client.getLocalPlayer().getName());
                 payload.setScreenshot(encodedFile);
 
