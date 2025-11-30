@@ -882,36 +882,23 @@ public class ProfitTrackerPlugin extends Plugin
             return;
         }
 
-        if (!LEAGUE_ID_PATTERN.matcher(id.trim()).matches())
-        {
-            notifier.notify("Invalid League ID format. Example: 68a0ae63-32a2-4e89-997b-4b26d5950112");
-            sendChatMessage("[Profit Tracker] ❌ Invalid League ID format! Example: 68a0ae63-32a2-4e89-997b-4b26d5950112", true);
-            return;
-        }
-
         try
         {
-            boolean success = leagueService.addLeaguePlayerId(id.trim());
+            String result = leagueService.addLeaguePlayerId(id.trim());
 
-            if (success)
-            {
-                notifier.notify("League player ID added successfully!");
-                sendChatMessage("[Profit Tracker] ✅ League player ID added successfully!", false);
-                log.info("League player ID added: {}", id.trim());
+            notifier.notify("League player ID added successfully!");
+            sendChatMessage("[Profit Tracker] ✅ League player ID added successfully!", false);
+            log.info("League player ID added: {}", id.trim());
 
-                // Clear the input field after successful submission
-                configManager.setConfiguration("ptconfig", "leaguePlayerId", "");
-            }
-            else
-            {
-                // ID already exists (duplicate)
-                notifier.notify("League player ID already exists in the list");
-                sendChatMessage("[Profit Tracker] ℹ️ League player ID already exists in the list (not added again)", false);
-                log.info("League player ID already exists: {}", id.trim());
-
-                // Clear the input field even if it's a duplicate
-                configManager.setConfiguration("ptconfig", "leaguePlayerId", "");
-            }
+            // Clear the input field after successful submission
+            configManager.setConfiguration("ptconfig", "leaguePlayerId", "");
+        }
+        catch (IllegalArgumentException e)
+        {
+            // ID validation failed or already exists
+            log.error("Invalid League player ID", e);
+            notifier.notify(e.getMessage());
+            sendChatMessage("[Profit Tracker] ❌ " + e.getMessage(), true);
         }
         catch (Exception e)
         {

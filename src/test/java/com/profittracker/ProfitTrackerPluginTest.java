@@ -15,9 +15,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 
-//not sure if this was really needed, maybe all the tests want to go in leagueservicetests but here it is.
-
-
 public class ProfitTrackerPluginTest {
 
     private ProfitTrackerPlugin plugin;
@@ -28,8 +25,6 @@ public class ProfitTrackerPluginTest {
     private ChatMessageManager chatMessageManager;
     private LeagueService leagueService;
 
-    private static final Pattern LEAGUE_ID_PATTERN =
-            Pattern.compile(ProfitTrackerConfig.LEAGUE_PLAYER_ID_REGEX);
 
     @Before
     public void setUp() {
@@ -73,36 +68,13 @@ public class ProfitTrackerPluginTest {
         return event;
     }
 
-// regex tests
-
-    @Test
-    public void leagueIdRegex_ValidUUID_ShouldMatch() {
-        // Valid UUID format
-        String validId = "68a0ae63-32a2-4e89-997b-4b26d5950112";
-        assertTrue(LEAGUE_ID_PATTERN.matcher(validId).matches());
-    }
-
-    @Test
-    public void leagueIdRegex_ValidUUID_MixedCase_ShouldMatch() {
-        String validId = "AaBbCcDd-EeFf-1122-3344-556677889900";
-        assertTrue(LEAGUE_ID_PATTERN.matcher(validId).matches());
-    }
-
-    @Test
-    public void leagueIdRegex_InvalidFormat_ShouldNotMatch() {
-        String invalidId = "invalid-format-123";
-        assertFalse(LEAGUE_ID_PATTERN.matcher(invalidId).matches());
-    }
-
-  //onconfig tests, these maybe want to go in leagueserviceimpl?
-
     @Test
     public void onConfigChanged_DuplicateLeagueId_ShouldNotifyAlreadyExists() throws Exception {
         // Arrange
         String validId = "68a0ae63-32a2-4e89-997b-4b26d5950112";
         ConfigChanged event = createConfigChangedEvent("ptconfig", "submitLeagueId", "true");
         when(config.leaguePlayerId()).thenReturn(validId);
-        when(leagueService.addLeaguePlayerId(validId)).thenReturn(false); // false = duplicate
+        when(leagueService.addLeaguePlayerId(validId)).thenThrow(new IllegalArgumentException("League player id " + validId + " already exists in leagueData")); // duplicate throws exception
 
         // Act
         plugin.onConfigChanged(event);
